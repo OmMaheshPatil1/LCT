@@ -1,0 +1,68 @@
+<meta name='viewport' content='width=device-width, initial-scale=1'/><!DOCTYPE html>
+<html>
+<head>
+  <title>Location Tracker</title>
+</head>
+<body>
+  <h2>Fetching your location...</h2>
+  <p id="status">Please allow location access.</p>
+
+  <!-- Firebase SDK -->
+  <script type="module">
+    // Firebase import from CDN
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+    // Your Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyCOF0g_qosVz8RI2MvkXK70f-YTfYucHrY",
+      authDomain: "loctrack-4b5c6.firebaseapp.com",
+      databaseURL: "https://loctrack-4b5c6-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "loctrack-4b5c6",
+      storageBucket: "loctrack-4b5c6.firebasestorage.app",
+      messagingSenderId: "675032550610",
+      appId: "1:675032550610:web:d0e4243986f7ed8741710b",
+      measurementId: "G-8K63CJHCQ1"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+
+    const statusEl = document.getElementById("status");
+
+    function sendLocation(lat, lon) {
+      const locationRef = ref(database, 'locations');
+      const newLocRef = push(locationRef);
+      set(newLocRef, {
+        latitude: lat,
+        longitude: lon,
+        timestamp: new Date().toISOString()
+      }).then(() => {
+        statusEl.textContent = "Location sent successfully.";
+      }).catch((error) => {
+        statusEl.textContent = "Error sending location: " + error.message;
+      });
+    }
+
+    function getLocation() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+            sendLocation(lat, lon);
+          },
+          (error) => {
+            statusEl.textContent = "Location access denied or error occurred.";
+          }
+        );
+      } else {
+        statusEl.textContent = "Geolocation is not supported by this browser.";
+      }
+    }
+
+    getLocation();
+  </script>
+</body>
+</html>
